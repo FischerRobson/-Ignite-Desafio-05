@@ -11,6 +11,8 @@ import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
 import Head from 'next/head';
 
+import { FaCalendarAlt, FaUserAlt } from "react-icons/fa"
+
 interface Post {
   uid?: string;
   first_publication_date: string | null;
@@ -44,11 +46,12 @@ export default function Home({ postsPagination }: HomeProps) {
 
         {results.map(post => {
           return (
-            <article key={post.uid}>
+            <section key={post.uid}>
               <h1>{post.data.title}</h1>
               <p>{post.data.subtitle}</p>
-              <span>{post.data.author}</span><span>{post.first_publication_date}</span>
-            </article>
+              <span><FaCalendarAlt />{post.data.author}</span>
+              <span><FaUserAlt />{post.first_publication_date}</span>
+            </section>
           )
         })}
 
@@ -77,9 +80,7 @@ export const getStaticProps: GetStaticProps = async () => {
         author: (post.data.subtitle)
       }
     }
-  })
-
-  console.log(response);
+  });
 
   return {
     props: {
