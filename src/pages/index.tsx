@@ -11,7 +11,8 @@ import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
 import Head from 'next/head';
 
-import { FaCalendarAlt, FaUserAlt } from "react-icons/fa"
+import { FiCalendar, FiUser } from "react-icons/fi"
+import { useState } from 'react';
 
 interface Post {
   uid?: string;
@@ -34,27 +35,36 @@ interface HomeProps {
 
 export default function Home({ postsPagination }: HomeProps) {
 
-  const { results } = postsPagination;
+  const { results, next_page } = postsPagination;
+
+  const [posts, setPosts] = useState<Post[]>(results);
+  const [nextPage, setNextPage] = useState<string>(next_page);
 
   return (
     <>
       <Head>
         <title>Home | Space Traveling</title>
       </Head>
+      <Header />
       <div className={styles.homeContainer}>
-        <Header />
-
-        {results.map(post => {
+        {posts.map(post => {
           return (
             <section key={post.uid}>
               <h1>{post.data.title}</h1>
               <p>{post.data.subtitle}</p>
-              <span><FaCalendarAlt />{post.data.author}</span>
-              <span><FaUserAlt />{post.first_publication_date}</span>
+              <div>
+                <span><FiCalendar />{post.data.author}</span>
+                <span><FiUser />{post.first_publication_date}</span>
+              </div>
             </section>
           )
         })}
 
+        {nextPage && (
+          <footer>
+            <button>Carregar mais posts</button>
+          </footer>
+        )}
       </div>
     </>
   )
@@ -67,7 +77,7 @@ export const getStaticProps: GetStaticProps = async () => {
     Prismic.predicates.at('document.type', 'post')
   ], {
     fetch: ['post.title', 'post.subtitle', 'post.author'],
-    pageSize: 20,
+    pageSize: 1,
   });
 
   const posts = response.results.map(post => {
@@ -77,7 +87,7 @@ export const getStaticProps: GetStaticProps = async () => {
       data: {
         title: (post.data.title),
         subtitle: (post.data.subtitle),
-        author: (post.data.subtitle)
+        author: (post.data.author)
       }
     }
   });
@@ -85,7 +95,7 @@ export const getStaticProps: GetStaticProps = async () => {
   return {
     props: {
       postsPagination: {
-        next_page: null,
+        next_page: response.next_page,
         results: posts,
       }
     }
