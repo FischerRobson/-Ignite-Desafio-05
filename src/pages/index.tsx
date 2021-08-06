@@ -11,8 +11,9 @@ import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
 import Head from 'next/head';
 
-import { FiCalendar, FiUser } from "react-icons/fi"
+import { FiCalendar, FiUser } from "react-icons/fi";
 import { useState } from 'react';
+import Link from 'next/link';
 
 interface Post {
   uid?: string;
@@ -40,6 +41,10 @@ export default function Home({ postsPagination }: HomeProps) {
   const [posts, setPosts] = useState<Post[]>(results);
   const [nextPage, setNextPage] = useState<string>(next_page);
 
+  const loadNextPage = async () => {
+
+  }
+
   return (
     <>
       <Head>
@@ -49,14 +54,16 @@ export default function Home({ postsPagination }: HomeProps) {
       <div className={styles.homeContainer}>
         {posts.map(post => {
           return (
-            <section key={post.uid}>
-              <h1>{post.data.title}</h1>
-              <p>{post.data.subtitle}</p>
-              <div>
-                <span><FiCalendar />{post.data.author}</span>
-                <span><FiUser />{post.first_publication_date}</span>
-              </div>
-            </section>
+            <Link href={`/post/${post.uid}`} >
+              <a key={post.uid}>
+                <h1>{post.data.title}</h1>
+                <p>{post.data.subtitle}</p>
+                <div>
+                  <span><FiCalendar />{post.data.author}</span>
+                  <span><FiUser />{post.first_publication_date}</span>
+                </div>
+              </a>
+            </Link>
           )
         })}
 
@@ -77,7 +84,7 @@ export const getStaticProps: GetStaticProps = async () => {
     Prismic.predicates.at('document.type', 'post')
   ], {
     fetch: ['post.title', 'post.subtitle', 'post.author'],
-    pageSize: 1,
+    pageSize: 2,
   });
 
   const posts = response.results.map(post => {

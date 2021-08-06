@@ -4,8 +4,9 @@
   flex-direction: column;
   align-items: center;
 
-  section {
+  a {
     width: 700px;
+    text-decoration: none;
 
     h1 {
       font-size: 1.75rem;
@@ -34,8 +35,15 @@
       }
     }
 
-    & + section {
+    & + a {
       margin-top: 2.5rem;
+    }
+
+    transition: all 0.3s;
+
+    &:hover {
+      cursor: pointer;
+      filter: brightness(0.7);
     }
   }
 
