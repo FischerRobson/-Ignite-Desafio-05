@@ -104,7 +104,7 @@ export const getStaticPaths = async () => {
 
   const posts = await prismic.query(
     [Prismic.predicates.at('document.type', 'post')],
-    { pageSize: 3 }
+    { pageSize: 20 }
   );
 
   const paths = posts.results.map(result => {
