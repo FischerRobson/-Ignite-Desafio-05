@@ -1,6 +1,6 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { RichText } from 'prismic-dom';
-import { Header } from '../../components/Header';
+import Header from '../../components/Header';
 
 import { getPrismicClient } from '../../services/prismic';
 import Prismic from "@prismicio/client";
