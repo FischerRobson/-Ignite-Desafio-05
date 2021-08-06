@@ -42,7 +42,23 @@ export default function Home({ postsPagination }: HomeProps) {
   const [nextPage, setNextPage] = useState<string>(next_page);
 
   const loadNextPage = async () => {
-
+    await fetch(next_page)
+      .then(res => res.json())
+      .then(res => {
+        const newPosts = res.results.map(post => {
+          return {
+            uid: post.uid,
+            first_publication_date: formatDate(post.first_publication_date),
+            data: {
+              title: (post.data.title),
+              subtitle: (post.data.subtitle),
+              author: (post.data.author)
+            }
+          }
+        })
+        setPosts([...posts, ...newPosts]);
+        setNextPage(res.next_page);
+      })
   }
 
   return (
@@ -54,13 +70,13 @@ export default function Home({ postsPagination }: HomeProps) {
       <div className={styles.homeContainer}>
         {posts.map(post => {
           return (
-            <Link href={`/post/${post.uid}`} >
-              <a key={post.uid}>
+            <Link key={post.uid} href={`/post/${post.uid}`} >
+              <a>
                 <h1>{post.data.title}</h1>
                 <p>{post.data.subtitle}</p>
                 <div>
-                  <span><FiCalendar />{post.data.author}</span>
-                  <span><FiUser />{post.first_publication_date}</span>
+                  <span><FiCalendar />{formatDate(post.first_publication_date)}</span>
+                  <span><FiUser />{post.data.author}</span>
                 </div>
               </a>
             </Link>
@@ -69,7 +85,9 @@ export default function Home({ postsPagination }: HomeProps) {
 
         {nextPage && (
           <footer>
-            <button>Carregar mais posts</button>
+            <button onClick={() => loadNextPage()}>
+              Carregar mais posts
+            </button>
           </footer>
         )}
       </div>
@@ -84,13 +102,14 @@ export const getStaticProps: GetStaticProps = async () => {
     Prismic.predicates.at('document.type', 'post')
   ], {
     fetch: ['post.title', 'post.subtitle', 'post.author'],
-    pageSize: 2,
+    pageSize: 20,
   });
 
   const posts = response.results.map(post => {
     return {
       uid: post.uid,
-      first_publication_date: formatDate(post.first_publication_date),
+      //first_publication_date: formatDate(post.first_publication_date),
+      first_publication_date: post.first_publication_date,
       data: {
         title: (post.data.title),
         subtitle: (post.data.subtitle),

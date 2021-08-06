@@ -3,12 +3,14 @@ import { RichText } from 'prismic-dom';
 import { Header } from '../../components/Header';
 
 import { getPrismicClient } from '../../services/prismic';
+import Prismic from "@prismicio/client";
 
 import commonStyles from '../../styles/common.module.scss';
 import { formatDate } from '../../utils/formatDate';
 import styles from './post.module.scss';
 
 import { FiCalendar, FiUser, FiClock } from "react-icons/fi";
+import { useRouter } from 'next/router';
 
 interface Post {
   first_publication_date: string | null;
@@ -33,6 +35,8 @@ interface PostProps {
 
 export default function Post({ post }: PostProps) {
 
+  const router = useRouter();
+
   const totalPostWordsBody = RichText.asText(
     post.data.content.reduce((acc, data) => [...acc, ...data.body], [])
   ).split(' ').length;
@@ -45,6 +49,10 @@ export default function Post({ post }: PostProps) {
   }, []).length;
 
   const totalReadTime = Math.ceil((totalPostWordsBody + totalPostWordsHeading) / 200);
+
+  if (router.isFallback) {
+    return <div>Carregando...</div>;
+  }
 
   return (
     <>
@@ -60,7 +68,7 @@ export default function Post({ post }: PostProps) {
         <h1>{post.data.title}</h1>
         <section>
           <span>
-            <FiCalendar />{post.first_publication_date}
+            <FiCalendar />{formatDate(post.first_publication_date)}
           </span>
           <span>
             <FiUser />
@@ -84,8 +92,6 @@ export default function Post({ post }: PostProps) {
             </div>
           ))}
         </main>
-
-
       </div>
 
     </>
@@ -95,12 +101,24 @@ export default function Post({ post }: PostProps) {
 
 export const getStaticPaths = async () => {
   const prismic = getPrismicClient();
-  //const posts = await prismic.query(TODO);
+
+  const posts = await prismic.query(
+    [Prismic.predicates.at('document.type', 'post')],
+    { pageSize: 3 }
+  );
+
+  const paths = posts.results.map(result => {
+    return {
+      params: {
+        slug: result.uid,
+      },
+    };
+  });
 
   return {
-    paths: [],
+    paths,
     fallback: true,
-  }
+  };
 };
 
 export const getStaticProps = async ({ req, params }) => {
@@ -112,7 +130,7 @@ export const getStaticProps = async ({ req, params }) => {
 
   const post = {
     ...response,
-    first_publication_date: formatDate(response.first_publication_date),
+    //first_publication_date: formatDate(response.first_publication_date),
     // data: {
     //   ...response.data,
     //   content: RichText.asHtml(response.data.content),
